@@ -1,9 +1,11 @@
 import cv2
 import os
+import tensorflow_hub as hub
+import tensorflow as tf
 
-from ultralytics import YOLO
-
-model = YOLO('yolov8n-pose.pt')
+# model = YOLO('yolov8n-pose.pt')
+model = hub.load("https://www.kaggle.com/models/google/movenet/frameworks/TensorFlow2/variations/singlepose-thunder/versions/4")
+movenet = model.signatures['serving_default']
 
 class PersonFrame:
 
@@ -37,33 +39,63 @@ class PersonFrame:
 
     # Draw the person's keypoints on the frame
     def draw_keypoints(self):
+        height, width, _ = self.frame.shape
 
-        model_results = model(self.frame)
-        for result in model_results:
-            boxes = result.boxes
-            keypoints = result.keypoints  # Keypoints object for keypoint outputs
-            # Make sure a person was found in the frame
-            if keypoints is not None and result.boxes.cls[0] == 0:
-                # Draw the keypoints on the frame
-                image_size = self.frame.shape[:2]
+        # Crop the frame to a square
+        # Calculate the starting point for the crop
+        start_y = (height - 1080) // 2
+        start_x = (width - 1080) // 2
+        # Perform the crop
+        cropped_image = self.frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
 
-                # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
-                dot_color = (0, 0, 255)
+        # Resize the frame to 256x256 so that MoveNet can process it
+        tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
+        tf_image = tf.expand_dims(tf_image, axis=0)
+        tf_image = tf.cast(tf.image.resize_with_pad(tf_image, 256, 256), dtype=tf.int32)
 
-                for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-                    dot_coordinates = (int(keypoints.data[0][i][0].item()), int(keypoints.data[0][i][1].item()))
-                    # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
+        # Run model inference
+        outputs = movenet(tf_image)
+        keypoints = outputs['output_0'].numpy()
 
-                    # Draw a red dot on the image
-                    cv2.circle(self.frame, dot_coordinates, radius=5, color=dot_color, thickness=-1)
-                cv2.imshow('Video Frame', self.frame)
-                wait = cv2.waitKey(1)
-                break
+        # Plot the keypoints on the frame
 
-        cv2.imshow('Video Frame', self.frame)
+        image_size = cropped_image.shape[:2]
+
+        # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
+        dot_color = (0, 0, 255)  # (B, G, R)
+
+        for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
+             dot_coordinates = (int(keypoints[0][0][i][1] * image_size[1]), int(keypoints[0][0][i][0] * image_size[0]))
+             cv2.circle(cropped_image, dot_coordinates, radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
+        # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
+
+        # Draw a red dot on the image
+
+
+        # model_results = model(self.frame)
+        # for result in model_results:
+        #     boxes = result.boxes
+        #     keypoints = result.keypoints  # Keypoints object for keypoint outputs
+        #     # Make sure a person was found in the frame
+        #     if keypoints is not None and result.boxes.cls[0] == 0:
+        #         # Draw the keypoints on the frame
+        #         image_size = self.frame.shape[:2]
+        #
+        #         # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
+        #         dot_color = (0, 0, 255)
+        #
+        #         for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
+        #             dot_coordinates = (int(keypoints.data[0][i][0].item()), int(keypoints.data[0][i][1].item()))
+        #             # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
+        #
+        #             # Draw a red dot on the image
+        #             cv2.circle(self.frame, dot_coordinates, radius=5, color=dot_color, thickness=-1)
+        #         cv2.imshow('Video Frame', self.frame)
+        #         wait = cv2.waitKey(1)
+        #         break
+
+        cv2.imshow('Video Frame', cropped_image)
         cv2.waitKey(1)
-
-
 
     # Find region of interest (where the human is)
     # Use the square size to crop the frame
