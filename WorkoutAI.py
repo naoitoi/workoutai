@@ -34,9 +34,10 @@ def main():
     for filename in ['JoynerSprintVideo.mp4', 'SakikoSprint.mp4', 'NaoSprint.mp4']:
         pv = PersonVideo(filename)
         personVideos.append(pv)
-        pv.analyze()
-        pv.show()
-        pv.save_video()
+        pv.draw_keypoints()
+        #pv.analyze()
+        #pv.show()
+        #pv.save_video()
 
 #        cap = cv2.VideoCapture(filename)
         # Loop through frames of a video

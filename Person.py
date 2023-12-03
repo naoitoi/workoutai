@@ -34,6 +34,37 @@ class PersonFrame:
 
                 return (crop_y2 - crop_y1, crop_x2 - crop_x1)
 
+
+    # Draw the person's keypoints on the frame
+    def draw_keypoints(self):
+
+        model_results = model(self.frame)
+        for result in model_results:
+            boxes = result.boxes
+            keypoints = result.keypoints  # Keypoints object for keypoint outputs
+            # Make sure a person was found in the frame
+            if keypoints is not None and result.boxes.cls[0] == 0:
+                # Draw the keypoints on the frame
+                image_size = self.frame.shape[:2]
+
+                # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
+                dot_color = (0, 0, 255)
+
+                for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
+                    dot_coordinates = (int(keypoints.data[0][i][0].item()), int(keypoints.data[0][i][1].item()))
+                    # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
+
+                    # Draw a red dot on the image
+                    cv2.circle(self.frame, dot_coordinates, radius=5, color=dot_color, thickness=-1)
+                cv2.imshow('Video Frame', self.frame)
+                wait = cv2.waitKey(1)
+                break
+
+        cv2.imshow('Video Frame', self.frame)
+        cv2.waitKey(1)
+
+
+
     # Find region of interest (where the human is)
     # Use the square size to crop the frame
     def crop_human(self, square_size):
@@ -166,6 +197,10 @@ class PersonVideo:
             max_height = max(max_height, height)
         print("Max height: %d, max width: %d" % (max_height, max_width))
         self.smallest_square_size = max(max_height, max_width)
+
+    def draw_keypoints(self):
+        for frame in self.frames:
+            frame.draw_keypoints()
 
     def show(self):
         for frame in self.frames:
