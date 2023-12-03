@@ -1,5 +1,5 @@
 import cv2
-import numpy as np
+import os
 
 from ultralytics import YOLO
 
@@ -120,6 +120,7 @@ class PersonVideo:
             self.filename = filename
             self.load_video(filename)
             print ("Loaded video %s (cap %s)" % (self.filename, self.cap))
+        self.outfilename = os.path.splitext(self.filename)[0] + '-out.mp4'
 
     # Load a video.  If filename is provided, load that video.  Otherwise, use the filename provided in the constructor
     def load_video(self, filename = None):
@@ -138,6 +139,19 @@ class PersonVideo:
             pf = PersonFrame(frame)
             self.frames.append(pf)
 
+    def save_video(self):
+        # Define the codec and create VideoWriter object
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(self.outfilename, fourcc, 20.0,
+                              (self.smallest_square_size, self.smallest_square_size))
+
+        for frame in self.frames:
+            # Write the frame to the output file
+            out.write(frame.frame)
+        # Release everything if job is finished
+        out.release()
+
+
     def find_keypoints(self):
         while self.cap.isOpened():
             pass
@@ -155,5 +169,5 @@ class PersonVideo:
 
     def show(self):
         for frame in self.frames:
-            frame.crop_human(self.smallest_square_size)
+            # frame.crop_human(self.smallest_square_size)
             frame.show()

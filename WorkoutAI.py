@@ -36,7 +36,7 @@ def main():
         personVideos.append(pv)
         pv.analyze()
         pv.show()
-
+        pv.save_video()
 
 #        cap = cv2.VideoCapture(filename)
         # Loop through frames of a video
