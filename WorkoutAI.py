@@ -43,19 +43,28 @@ def show_videos(file_names):
     # Create a window to display the videos
     window = cv2.namedWindow('Videos', cv2.WINDOW_NORMAL)
 
+    i = 0
     while True:
         # Capture frames from each video
-        ret1, frame1 = video1.read()
-        ret2, frame2 = video2.read()
 
-        # Check if the end of either video has been reached
-        # TODO repeat
-        if not ret1 or not ret2:
-            break
+        # Video 1 should be slowed down
+        if i == 0:
+            ret1, frame1 = video1.read()
+            if not ret1:
+                video1.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret1, frame1 = video1.read()
+            i = 1
+        else:
+            i = 0
+
+        ret2, frame2 = video2.read()
+        if not ret2:
+            video2.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret2, frame2 = video2.read()
 
         # Resize the frames to the same size
-        frame1 = cv2.resize(frame1, (512, 512))
-        frame2 = cv2.resize(frame2, (512, 512))
+        frame1 = cv2.resize(frame1, (768, 768))
+        frame2 = cv2.resize(frame2, (768, 768))
 
         # Combine the frames side by side
         combined = cv2.hconcat([frame1, frame2])
@@ -76,26 +85,30 @@ def show_videos(file_names):
 
 def main():
     num_args = len(sys.argv)
-    print("Arg length: ", num_args)
     # Get the arguments from the command line
     if (num_args == 1):
+        print ("Load and analyze videos")
         load_and_analyze_videos()
+        return
+
     if sys.argv[1] == 'play':
         file_names = sys.argv[2:]
+        print ("Show videos: " + str(sys.argv[2:]))
         show_videos(file_names)
-
+        return
     else:
         print("WorkoutAI.py <filename> [<filename> ...])")  # Analyze and show the video
         print("Usage: python3.11 WorkoutAI.py play <filename> [<filename> ...]")  # Play existing videos
 
 def load_and_analyze_videos():
     personVideos = []
-    for filename in ['JoynerSprintSquare.mp4', 'SakikoSprintSquare.mp4', 'NaoSprintSquare.mp4']:
-    #for filename in ['NaoSprintSquare.mp4']:
+    for filename, slow_down_factor in [('JoynerSprintSquare.mp4', 2),
+                                       ('SakikoSprintSquare.mp4', 1),
+                                       ('NaoSprintSquare.mp4', 1)]:
         pv = PersonVideo(filename)
         personVideos.append(pv)
         pv.draw_keypoints()
-        pv.save_video()
+        pv.save_video(slow_down_factor)
         #pv.analyze()
         if pv.show() == False:
             break

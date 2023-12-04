@@ -225,12 +225,14 @@ class PersonVideo:
             pf = PersonFrame(frame)
             self.frames.append(pf)
 
-    def save_video(self):
+    def save_video(self, slow_down_factor = 1):
         height, width, _ = self.frames[0].frame.shape
-        print ("Saving: %s" % self.outfilename)
+        print ("Saving: %s (fps: %d)" % (self.outfilename, self.cap.get(cv2.CAP_PROP_FPS)))
+
         # Define the codec and create VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(self.outfilename, fourcc, 20.0,
+        out = cv2.VideoWriter(self.outfilename, fourcc,
+                              self.cap.get(cv2.CAP_PROP_FPS) // slow_down_factor,
                               (width, height))
 
         for frame in self.frames:
