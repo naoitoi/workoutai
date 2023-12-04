@@ -44,12 +44,12 @@ class PersonFrame:
         height, width, _ = self.frame.shape
 
         # Crop the frame to a square
-        # Calculate the starting point for the crop
-        #start_y = (height - 1080) // 2
-        #start_x = (width - 1080) // 2
+        # Assuming width > height
+        start_y = 0
+        start_x = width // 2 - (height // 2)
+
         # Perform the crop
-        #cropped_image = self.frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
-        cropped_image = self.frame
+        cropped_image = self.frame[start_y:start_y + height - 1, start_x:start_x + height, :]
 
         # Resize the frame to 256x256 so that MoveNet can process it
         tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
