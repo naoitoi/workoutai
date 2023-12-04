@@ -17,7 +17,9 @@ class PersonFrame:
     # Show the frame
     def show(self):
         cv2.imshow('Video Frame', self.frame)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            return False
+        return True
 
     # Find the smallest square that fits the person in the frame.
     # Return the height and width of the square
@@ -43,14 +45,16 @@ class PersonFrame:
 
         # Crop the frame to a square
         # Calculate the starting point for the crop
-        start_y = (height - 1080) // 2
-        start_x = (width - 1080) // 2
+        #start_y = (height - 1080) // 2
+        #start_x = (width - 1080) // 2
         # Perform the crop
-        cropped_image = self.frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
+        #cropped_image = self.frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
+        cropped_image = self.frame
 
         # Resize the frame to 256x256 so that MoveNet can process it
         tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
         tf_image = tf.expand_dims(tf_image, axis=0)
+        #tf_image = tf.cast(tf.image.resize_with_pad(tf_image, 256, 256), dtype=tf.int32)
         tf_image = tf.cast(tf.image.resize_with_pad(tf_image, 256, 256), dtype=tf.int32)
 
         # Run model inference
@@ -69,8 +73,30 @@ class PersonFrame:
              cv2.circle(cropped_image, dot_coordinates, radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
         # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
 
-        # Draw a red dot on the image
+        # Draw yello line between the dots
+        # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
+        line_color = (0, 255, 255)  # (B, G, R)
+        pair = [13, 15]
+        cv2.line(cropped_image,
+                 (int(keypoints[0][0][pair[0]][1] * image_size[1]),
+                      int(keypoints[0][0][pair[0]][0] * image_size[0])),
+                 (int(keypoints[0][0][pair[1]][1] * image_size[1]),
+                 int(keypoints[0][0][pair[1]][0] * image_size[0])),
+                 line_color,3)
 
+        # orange color
+        line_color = (0, 165, 255)
+        pair = [14, 16]
+        cv2.line(cropped_image,
+                 (int(keypoints[0][0][pair[0]][1] * image_size[1]),
+                      int(keypoints[0][0][pair[0]][0] * image_size[0])),
+                 (int(keypoints[0][0][pair[1]][1] * image_size[1]),
+                 int(keypoints[0][0][pair[1]][0] * image_size[0])),
+                 line_color,3)
+
+
+        # Draw a red dot on the image
+        self.frame = cropped_image
 
         # model_results = model(self.frame)
         # for result in model_results:
@@ -93,9 +119,6 @@ class PersonFrame:
         #         cv2.imshow('Video Frame', self.frame)
         #         wait = cv2.waitKey(1)
         #         break
-
-        cv2.imshow('Video Frame', cropped_image)
-        cv2.waitKey(1)
 
     # Find region of interest (where the human is)
     # Use the square size to crop the frame
@@ -203,21 +226,18 @@ class PersonVideo:
             self.frames.append(pf)
 
     def save_video(self):
+        height, width, _ = self.frames[0].frame.shape
+        print ("Saving: %s" % self.outfilename)
         # Define the codec and create VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(self.outfilename, fourcc, 20.0,
-                              (self.smallest_square_size, self.smallest_square_size))
+                              (width, height))
 
         for frame in self.frames:
             # Write the frame to the output file
             out.write(frame.frame)
         # Release everything if job is finished
         out.release()
-
-
-    def find_keypoints(self):
-        while self.cap.isOpened():
-            pass
 
     def analyze(self):
         max_height = 0
@@ -237,4 +257,7 @@ class PersonVideo:
     def show(self):
         for frame in self.frames:
             # frame.crop_human(self.smallest_square_size)
-            frame.show()
+            rv = frame.show()
+            if rv == False:
+                return False
+        return True

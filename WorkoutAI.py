@@ -13,8 +13,10 @@ def analyze_frame(frame):
     start_y = (height - 1080) // 2
     start_x = (width - 1080) // 2
     # Perform the crop
-    cropped_image = frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
+    #cropped_image = frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
+    cropped_image = frame
     cv2.imshow('Video Frame', cropped_image)
+    wait = cv2.waitKey(1)
 
     # Resize the frame to 256x256
     tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
@@ -31,13 +33,15 @@ def analyze_frame(frame):
 def main():
 
     personVideos = []
-    for filename in ['JoynerSprintVideo.mp4', 'SakikoSprint.mp4', 'NaoSprint.mp4']:
+    for filename in ['JoynerSprintSquare.mp4', 'SakikoSprintSquare.mp4', 'NaoSprintSquare.mp4']:
+    #for filename in ['NaoSprintSquare.mp4']:
         pv = PersonVideo(filename)
         personVideos.append(pv)
         pv.draw_keypoints()
+        pv.save_video()
         #pv.analyze()
-        #pv.show()
-        #pv.save_video()
+        if pv.show() == False:
+            break
 
 #        cap = cv2.VideoCapture(filename)
         # Loop through frames of a video
