@@ -1,7 +1,10 @@
+import json
+
 import cv2
 import os
 import tensorflow_hub as hub
 import tensorflow as tf
+from WorkoutUtils import WorkoutUtils
 
 # model = YOLO('yolov8n-pose.pt')
 model = hub.load("https://www.kaggle.com/models/google/movenet/frameworks/TensorFlow2/variations/singlepose-thunder/versions/4")
@@ -21,25 +24,11 @@ class PersonFrame:
             return False
         return True
 
-    # Find the smallest square that fits the person in the frame.
-    # Return the height and width of the square
-    def find_smallest_square(self):
-        # Find the person in the image
-        height, width, _ = self.frame.shape
-
-        crop_results = model(self.frame)
-        for result in crop_results:
-            boxes = result.boxes  # Boxes object for bbox outputs
-            if boxes is not None and boxes.cls[0] == 0:
-                crop_x1 = round(boxes.data[0][0].item())
-                crop_x2 = round(boxes.data[0][2].item())
-                crop_y1 = round(boxes.data[0][1].item())
-                crop_y2 = round(boxes.data[0][3].item())
-
-                return (crop_y2 - crop_y1, crop_x2 - crop_x1)
-
-
     # Draw the person's keypoints on the frame
+    # Returns a dictionary including:
+    # hs: horizontal stride
+    # vs: virtical stride
+    # leg_len: length of the leg
     def draw_keypoints(self):
         height, width, _ = self.frame.shape
 
@@ -68,9 +57,13 @@ class PersonFrame:
         # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
         dot_color = (0, 0, 255)  # (B, G, R)
 
+        key_point_coordinates = []
+        for i in range(17):
+            dot_coordinates = (int(keypoints[0][0][i][1] * image_size[1]), int(keypoints[0][0][i][0] * image_size[0]))
+            key_point_coordinates.append(dot_coordinates)
+
         for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-             dot_coordinates = (int(keypoints[0][0][i][1] * image_size[1]), int(keypoints[0][0][i][0] * image_size[0]))
-             cv2.circle(cropped_image, dot_coordinates, radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
+             cv2.circle(cropped_image, key_point_coordinates[i], radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
         # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
 
         # Draw yello line between the dots
@@ -94,31 +87,41 @@ class PersonFrame:
                  int(keypoints[0][0][pair[1]][0] * image_size[0])),
                  line_color,3)
 
+        r_ankle = WorkoutUtils.KEYPOINT_DICT['right_ankle']
+        l_ankle = WorkoutUtils.KEYPOINT_DICT['left_ankle']
+        r_knee = WorkoutUtils.KEYPOINT_DICT['right_knee']
+        l_knee = WorkoutUtils.KEYPOINT_DICT['left_knee']
+        r_hip = WorkoutUtils.KEYPOINT_DICT['right_hip']
+        l_hip = WorkoutUtils.KEYPOINT_DICT['left_hip']
+
+        #horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[l_ankle][0])
+        l_horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[r_hip][0])
+        r_horizontal_stride = abs(key_point_coordinates[l_ankle][0] - key_point_coordinates[l_hip][0])
+        r_leg_len = (cv2.norm(key_point_coordinates[r_hip], key_point_coordinates[r_knee]) +
+                     cv2.norm(key_point_coordinates[r_knee], key_point_coordinates[r_ankle]))
+        l_leg_len = (cv2.norm(key_point_coordinates[l_hip], key_point_coordinates[l_knee]) +
+                     cv2.norm(key_point_coordinates[l_knee], key_point_coordinates[l_ankle]))
+
+        if r_horizontal_stride > l_horizontal_stride:
+            horizontal_stride = r_horizontal_stride
+            leg_len = r_leg_len
+        else:
+            horizontal_stride = l_horizontal_stride
+            leg_len = l_leg_len
+
+        virtical_stride = abs(key_point_coordinates[r_ankle][1] - key_point_coordinates[l_ankle][1])
+        # print ("horizontal_stride: %d, virtical_stride: %d" % (horizontal_stride, virtical_stride))
 
         # Draw a red dot on the image
         self.frame = cropped_image
+        #cv2.imshow('Video Frame', self.frame)
+        #cv2.waitKey(1)
 
-        # model_results = model(self.frame)
-        # for result in model_results:
-        #     boxes = result.boxes
-        #     keypoints = result.keypoints  # Keypoints object for keypoint outputs
-        #     # Make sure a person was found in the frame
-        #     if keypoints is not None and result.boxes.cls[0] == 0:
-        #         # Draw the keypoints on the frame
-        #         image_size = self.frame.shape[:2]
-        #
-        #         # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
-        #         dot_color = (0, 0, 255)
-        #
-        #         for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-        #             dot_coordinates = (int(keypoints.data[0][i][0].item()), int(keypoints.data[0][i][1].item()))
-        #             # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
-        #
-        #             # Draw a red dot on the image
-        #             cv2.circle(self.frame, dot_coordinates, radius=5, color=dot_color, thickness=-1)
-        #         cv2.imshow('Video Frame', self.frame)
-        #         wait = cv2.waitKey(1)
-        #         break
+        return {
+            'hs': horizontal_stride,
+            'vs': virtical_stride,
+            'leg_len': leg_len
+        }
 
     # Find region of interest (where the human is)
     # Use the square size to crop the frame
@@ -144,55 +147,11 @@ class PersonFrame:
                 x1 = 0
                 x2 += margin
 
-            # print ("Cropping to y (%d, %d), x (%d, %d)" % (y1, y2, x1, x2))
             self.frame = self.frame[int(y1):int(y2), int(x1):int(x2), :]
             break
 
         cv2.imshow('Video Frame', self.frame)
         cv2.waitKey(1)
-        #
-        # # Plot the keypoints on the frame
-        #
-        # image_size = cropped_image.shape[:2]
-        #
-        # # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
-        # dot_color = (0, 0, 255)  # (B, G, R)
-        #
-        # for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-        #     dot_coordinates = (int(keypoints[0][0][i][1] * image_size[1]), int(keypoints[0][0][i][0] * image_size[0]))
-        # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
-
-        # # Crop the frame to a square
-        # # Calculate the starting point for the crop
-        # start_y = (height - 1080) // 2
-        # start_x = (width - 1080) // 2
-        # # Perform the crop
-        # cropped_image = frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
-        # cv2.imshow('Video Frame', cropped_image)
-        #
-        # # Resize the frame to 256x256
-        # tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
-        # tf_image = tf.expand_dims(tf_image, axis=0)
-        # tf_image = tf.cast(tf.image.resize_with_pad(tf_image, 256, 256), dtype=tf.int32)
-        #
-        # # Run model inference
-        # outputs = movenet(tf_image)
-        # keypoints = outputs['output_0'].numpy()
-        #
-        # # Plot the keypoints on the frame
-        #
-        # image_size = cropped_image.shape[:2]
-        #
-        # # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
-        # dot_color = (0, 0, 255)  # (B, G, R)
-        #
-        # for i in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-        #     dot_coordinates = (int(keypoints[0][0][i][1] * image_size[1]), int(keypoints[0][0][i][0] * image_size[0]))
-            # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
-
-            # Draw a red dot on the image
-     #       cv2.circle(cropped_image, dot_coordinates, radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
-
 
 class PersonVideo:
 
@@ -200,13 +159,15 @@ class PersonVideo:
     def __init__(self, filename = None):
         self.keypoints = []
         self.frames = []
-        self.smallest_square_size = 0
+        self.metadata = {}
 
         if filename is not None:
             self.filename = filename
             self.load_video(filename)
             print ("Loaded video %s (cap %s)" % (self.filename, self.cap))
-        self.outfilename = os.path.splitext(self.filename)[0] + '-out.mp4'
+        filename_split = os.path.splitext(self.filename)[0]
+        self.outfilename = filename_split + '-out.mp4'
+        self.metafilename = filename_split + '-meta.json'
 
     # Load a video.  If filename is provided, load that video.  Otherwise, use the filename provided in the constructor
     def load_video(self, filename = None):
@@ -227,6 +188,13 @@ class PersonVideo:
 
     def save_video(self, slow_down_factor = 1):
         height, width, _ = self.frames[0].frame.shape
+
+        # Save the metadata
+        print ("Saving metadata: %s" % (self.metafilename))
+        with open(self.metafilename, 'w') as json_file:
+            json.dump(self.metadata, json_file)
+
+        # Save the annotated video
         print ("Saving: %s (fps: %d)" % (self.outfilename, self.cap.get(cv2.CAP_PROP_FPS)))
 
         # Define the codec and create VideoWriter object
@@ -241,24 +209,43 @@ class PersonVideo:
         # Release everything if job is finished
         out.release()
 
-    def analyze(self):
-        max_height = 0
-        max_width = 0
-        for frame in self.frames:
-            #frame.crop_human()
-            height, width = frame.find_smallest_square()
-            max_width = max(max_width, width)
-            max_height = max(max_height, height)
-        print("Max height: %d, max width: %d" % (max_height, max_width))
-        self.smallest_square_size = max(max_height, max_width)
-
     def draw_keypoints(self):
+        max_horizontal_stride = 0
+        mhs_frame = None
+        max_virtical_stride = 0
+        mvs_frame = None
+
+        i = 0 # Assume frames are numbered from 0 and increase by 1
         for frame in self.frames:
-            frame.draw_keypoints()
+            dict = frame.draw_keypoints()
+            horizontal_stride = dict['hs']
+            virtical_stride = dict['vs']
+            leg_len = dict['leg_len']
+
+            if horizontal_stride > max_horizontal_stride:
+                max_horizontal_stride = horizontal_stride
+                hs_ratio = horizontal_stride / leg_len
+                mhs_frame = i
+            if virtical_stride > max_virtical_stride:
+                max_virtical_stride = virtical_stride
+                vs_ratio = virtical_stride / leg_len
+                mvs_frame = i
+            i = i + 1
+
+        print ("Max horizontal stride: %d, ratio %f (frame %d)" % (max_horizontal_stride, hs_ratio, mhs_frame))
+        print ("Max virtical stride: %d, ratio %f (frame %d)" % (max_virtical_stride, vs_ratio, mvs_frame))
+
+        self.metadata = {
+            'max_horizontal_stride': max_horizontal_stride,
+            'hs_ratio': hs_ratio,
+            'mhs_frame': mhs_frame,
+            'max_virtical_stride': max_virtical_stride,
+            'vs_ratio': vs_ratio,
+            'mvs_frame': mvs_frame
+        }
 
     def show(self):
         for frame in self.frames:
-            # frame.crop_human(self.smallest_square_size)
             rv = frame.show()
             if rv == False:
                 return False

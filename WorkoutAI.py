@@ -1,44 +1,19 @@
+import json
 import sys
 
 import cv2
 import tensorflow as tf
 
 from Person import PersonVideo
-from Person import PersonFrame
-
-def analyze_frame(frame):
-
-    height, width, _ = frame.shape
-
-    # Crop the frame to a square
-    # Calculate the starting point for the crop
-    start_y = (height - 1080) // 2
-    start_x = (width - 1080) // 2
-    # Perform the crop
-    #cropped_image = frame[start_y:start_y + 1080, start_x:start_x + 1080, :]
-    cropped_image = frame
-    cv2.imshow('Video Frame', cropped_image)
-    wait = cv2.waitKey(1)
-
-    # Resize the frame to 256x256
-    tf_image = tf.convert_to_tensor(cropped_image, dtype=tf.float32)
-    tf_image = tf.expand_dims(tf_image, axis=0)
-    tf_image = tf.cast(tf.image.resize_with_pad(tf_image, 256, 256), dtype=tf.int32)
-
-    # Run model inference
-
-    # Plot the keypoints on the frame
-
-    cv2.imshow('Video Frame', cropped_image)
-
-    return cropped_image
 
 def show_videos(file_names):
-    # Read the first video
-    video1 = cv2.VideoCapture(file_names[0])
+    # Read the first video and metadata
+    video1 = cv2.VideoCapture(file_names[0] + '-out.mp4')
+    metadata1 = json.load(open(file_names[0] + '-meta.json'))
 
-    # Read the second video
-    video2 = cv2.VideoCapture(file_names[1])
+    # Read the second video and metadata
+    video2 = cv2.VideoCapture(file_names[1] + '-out.mp4')
+    metadata2 = json.load(open(file_names[1] + '-meta.json'))
 
     # Create a window to display the videos
     window = cv2.namedWindow('Videos', cv2.WINDOW_NORMAL)
@@ -46,7 +21,6 @@ def show_videos(file_names):
     i = 0
     while True:
         # Capture frames from each video
-
         # Video 1 should be slowed down
         if i == 0:
             ret1, frame1 = video1.read()
@@ -73,8 +47,13 @@ def show_videos(file_names):
         cv2.imshow('Videos', combined)
 
         # Check if the user wants to quit
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        pressedKey = cv2.waitKey(1) & 0xFF
+        if chr(pressedKey).lower() == 'q':
             break
+        elif chr(pressedKey).lower() == 'h':
+            pass
+        elif chr(pressedKey).lower() == 'v':
+            pass
 
     # Close the videos
     video1.release()
@@ -112,21 +91,6 @@ def load_and_analyze_videos():
         #pv.analyze()
         if pv.show() == False:
             break
-
-#        cap = cv2.VideoCapture(filename)
-        # Loop through frames of a video
-#        while cap.isOpened():
-#            ret, frame = cap.read()
-#            if not ret:
-#                break
-#            frame = analyze_frame(frame)
-
-#            if cv2.waitKey(1) & 0xFF == ord('q'):
-#                break
-
-#    cv2.waitKey(1000)
-#    cap.release()
-#    cv2.destroyAllWindows()
 
 # This block checks if the script is being run directly
 if __name__ == "__main__":
