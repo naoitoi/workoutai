@@ -26,3 +26,15 @@ class WorkoutUtils:
     @staticmethod
     def draw_line_between_keypoints(frame, start, end, color, thickness=3):
         cv2.line(frame, start, end, color, thickness)
+
+    @staticmethod
+    def show_frames_side_by_side(frame1, frame2):
+        # Resize the frames to the same size
+        frame1 = cv2.resize(frame1, (768, 768))
+        frame2 = cv2.resize(frame2, (768, 768))
+
+        # Combine the frames side by side
+        combined = cv2.hconcat([frame1, frame2])
+
+        # Display the combined frames
+        cv2.imshow('Videos', combined)

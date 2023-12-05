@@ -5,6 +5,8 @@ import cv2
 import tensorflow as tf
 
 from Person import PersonVideo
+from WorkoutUtils import WorkoutUtils
+
 
 def show_videos(file_names):
     # Read the first video and metadata
@@ -36,24 +38,35 @@ def show_videos(file_names):
             video2.set(cv2.CAP_PROP_POS_FRAMES, 0)
             ret2, frame2 = video2.read()
 
-        # Resize the frames to the same size
-        frame1 = cv2.resize(frame1, (768, 768))
-        frame2 = cv2.resize(frame2, (768, 768))
-
-        # Combine the frames side by side
-        combined = cv2.hconcat([frame1, frame2])
-
-        # Display the combined frames
-        cv2.imshow('Videos', combined)
+        # Display the frames side by side
+        WorkoutUtils.show_frames_side_by_side(frame1, frame2)
 
         # Check if the user wants to quit
         pressedKey = cv2.waitKey(1) & 0xFF
         if chr(pressedKey).lower() == 'q':
             break
         elif chr(pressedKey).lower() == 'h':
-            pass
+            frame_index1 = metadata1['mhs_frame']
+            video1.set(cv2.CAP_PROP_POS_FRAMES, frame_index1)
+            ret, frame1 = video1.read()
+
+            frame_index2 = metadata2['mhs_frame']
+            video2.set(cv2.CAP_PROP_POS_FRAMES, frame_index2)
+            ret, frame2 = video2.read()
+
+            WorkoutUtils.show_frames_side_by_side(frame1, frame2)
+            cv2.waitKey((5000))
         elif chr(pressedKey).lower() == 'v':
-            pass
+            frame_index1 = metadata1['mvs_frame']
+            video1.set(cv2.CAP_PROP_POS_FRAMES, frame_index1)
+            ret, frame1 = video1.read()
+
+            frame_index2 = metadata2['mvs_frame']
+            video2.set(cv2.CAP_PROP_POS_FRAMES, frame_index2)
+            ret, frame2 = video2.read()
+
+            WorkoutUtils.show_frames_side_by_side(frame1, frame2)
+            cv2.waitKey((5000))
 
     # Close the videos
     video1.release()
