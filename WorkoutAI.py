@@ -49,23 +49,32 @@ def show_videos(file_names):
             frame_index1 = metadata1['mhs_frame']
             video1.set(cv2.CAP_PROP_POS_FRAMES, frame_index1)
             ret, frame1 = video1.read()
+            hs_ratio1 = metadata1['hs_ratio']
 
             frame_index2 = metadata2['mhs_frame']
             video2.set(cv2.CAP_PROP_POS_FRAMES, frame_index2)
             ret, frame2 = video2.read()
+            hs_ratio2 = metadata2['hs_ratio']
 
-            WorkoutUtils.show_frames_side_by_side(frame1, frame2)
+            text = ("Stride / Leg Len: Left = %d%%, Right = %d%%" %
+                    (round(hs_ratio1 * 100), round(hs_ratio2 * 100)))
+            WorkoutUtils.show_frames_side_by_side(frame1, frame2, text)
             cv2.waitKey((5000))
         elif chr(pressedKey).lower() == 'v':
             frame_index1 = metadata1['mvs_frame']
             video1.set(cv2.CAP_PROP_POS_FRAMES, frame_index1)
             ret, frame1 = video1.read()
+            vs_ratio1 = metadata1['vs_ratio']
 
             frame_index2 = metadata2['mvs_frame']
             video2.set(cv2.CAP_PROP_POS_FRAMES, frame_index2)
             ret, frame2 = video2.read()
+            vs_ratio2 = metadata2['vs_ratio']
 
-            WorkoutUtils.show_frames_side_by_side(frame1, frame2)
+            text = ("Stride / Leg Len: Left = %d%%, Right = %d%%" %
+                    (round(vs_ratio1 * 100), round(vs_ratio2 * 100)))
+
+            WorkoutUtils.show_frames_side_by_side(frame1, frame2, text)
             cv2.waitKey((5000))
 
     # Close the videos
