@@ -97,9 +97,22 @@ def main():
         print ("Show videos: " + str(sys.argv[2:]))
         show_videos(file_names)
         return
+    elif sys.argv[1] == 'analyze':
+        filename = sys.argv[2]
+        print ("Analyze video: " + filename)
+        load_and_analyze_video(filename)
+        return
     else:
         print("WorkoutAI.py <filename> [<filename> ...])")  # Analyze and show the video
-        print("Usage: python3.11 WorkoutAI.py play <filename> [<filename> ...]")  # Play existing videos
+        print("Usage: python3.11 WorkoutAI.py analyze <filename>.mp4")  # Analyze a new video
+        print("Usage: python3.11 WorkoutAI.py play <filename> [<filename> ...]")  # Play analyzed videos (no file extension)
+
+
+def load_and_analyze_video(filename, slow_down_factor = 1):
+    pv = PersonVideo(filename)
+    pv.draw_keypoints()
+    pv.save_video(slow_down_factor)
+    pv.show()
 
 def load_and_analyze_videos():
     personVideos = []

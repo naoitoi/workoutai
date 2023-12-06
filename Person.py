@@ -66,7 +66,14 @@ class PersonFrame:
              cv2.circle(cropped_image, key_point_coordinates[i], radius=5, color=dot_color, thickness=-1)  # -1 fills the circle
         # Define the coordinates for the red dot (assuming you want it at (x, y) = (100, 100))
 
-        # Draw yello line between the dots
+        r_ankle = WorkoutUtils.KEYPOINT_DICT['right_ankle']
+        l_ankle = WorkoutUtils.KEYPOINT_DICT['left_ankle']
+        r_knee = WorkoutUtils.KEYPOINT_DICT['right_knee']
+        l_knee = WorkoutUtils.KEYPOINT_DICT['left_knee']
+        r_hip = WorkoutUtils.KEYPOINT_DICT['right_hip']
+        l_hip = WorkoutUtils.KEYPOINT_DICT['left_hip']
+
+        # Draw yellow line between the dots
         # Define the color for the red dot in BGR format (OpenCV uses BGR instead of RGB)
         line_color = (0, 255, 255)  # (B, G, R)
         pair = [13, 15]
@@ -86,13 +93,6 @@ class PersonFrame:
                  (int(keypoints[0][0][pair[1]][1] * image_size[1]),
                  int(keypoints[0][0][pair[1]][0] * image_size[0])),
                  line_color,3)
-
-        r_ankle = WorkoutUtils.KEYPOINT_DICT['right_ankle']
-        l_ankle = WorkoutUtils.KEYPOINT_DICT['left_ankle']
-        r_knee = WorkoutUtils.KEYPOINT_DICT['right_knee']
-        l_knee = WorkoutUtils.KEYPOINT_DICT['left_knee']
-        r_hip = WorkoutUtils.KEYPOINT_DICT['right_hip']
-        l_hip = WorkoutUtils.KEYPOINT_DICT['left_hip']
 
         #horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[l_ankle][0])
         l_horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[r_hip][0])
