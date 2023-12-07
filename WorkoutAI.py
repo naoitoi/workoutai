@@ -2,11 +2,9 @@ import json
 import sys
 
 import cv2
-import tensorflow as tf
 
 from Person import PersonVideo
 from WorkoutUtils import WorkoutUtils
-
 
 def show_videos(file_names):
     # Read the first video and metadata
@@ -59,7 +57,7 @@ def show_videos(file_names):
             text = ("Stride / Leg Len: Left = %d%%, Right = %d%%" %
                     (round(hs_ratio1 * 100), round(hs_ratio2 * 100)))
             WorkoutUtils.show_frames_side_by_side(frame1, frame2, text)
-            cv2.waitKey((5000))
+            cv2.waitKey((10000))
         elif chr(pressedKey).lower() == 'v':
             frame_index1 = metadata1['mvs_frame']
             video1.set(cv2.CAP_PROP_POS_FRAMES, frame_index1)

@@ -95,8 +95,8 @@ class PersonFrame:
                  line_color,3)
 
         #horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[l_ankle][0])
-        l_horizontal_stride = abs(key_point_coordinates[r_ankle][0] - key_point_coordinates[r_hip][0])
-        r_horizontal_stride = abs(key_point_coordinates[l_ankle][0] - key_point_coordinates[l_hip][0])
+        l_horizontal_stride = key_point_coordinates[l_ankle][0] - key_point_coordinates[l_hip][0]
+        r_horizontal_stride = key_point_coordinates[r_ankle][0] - key_point_coordinates[r_hip][0]
         r_leg_len = (cv2.norm(key_point_coordinates[r_hip], key_point_coordinates[r_knee]) +
                      cv2.norm(key_point_coordinates[r_knee], key_point_coordinates[r_ankle]))
         l_leg_len = (cv2.norm(key_point_coordinates[l_hip], key_point_coordinates[l_knee]) +
@@ -198,7 +198,8 @@ class PersonVideo:
         print ("Saving: %s (fps: %d)" % (self.outfilename, self.cap.get(cv2.CAP_PROP_FPS)))
 
         # Define the codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fourcc = cv2.VideoWriter_fourcc(*'H264')
         out = cv2.VideoWriter(self.outfilename, fourcc,
                               self.cap.get(cv2.CAP_PROP_FPS) // slow_down_factor,
                               (width, height))
