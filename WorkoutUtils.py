@@ -61,7 +61,6 @@ class WorkoutUtils:
 
     @staticmethod
     def show_frames_side_by_side_sl(container, frame1, frame2, text = None):
-        print ("show_frames_side_by_side_sl")
         # Resize the frames to the same size
         frame1 = cv2.resize(frame1, (768, 768))
         frame2 = cv2.resize(frame2, (768, 768))
@@ -69,25 +68,24 @@ class WorkoutUtils:
         # Combine the frames side by side
         combined = cv2.hconcat([frame1, frame2])
 
-        # Add text at the bottom of the combined image
-        if text is None:
-            text = "Press H to show Horizontal Max.  V for Vertical Max.  Q to quit."
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 1
-        font_thickness = 2
-        text_color = (255, 255, 255)  # White color
+        if text is not None:
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1
+            font_thickness = 2
+            text_color = (255, 255, 255)  # White color
 
-        # Get the size of the text box
-        text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
+            # Get the size of the text box
+            text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
 
-        # Create a box with text
-        text_box = 255 * np.ones((50, combined.shape[1], 3), dtype=np.uint8)  # White box with height 50
-        cv2.putText(text_box, text, (10, 30), font, 1, (0, 0, 0), 2, cv2.LINE_AA)  # Put text on the box
+            # Create a box with text
+            text_box = 255 * np.ones((50, combined.shape[1], 3), dtype=np.uint8)  # White box with height 50
+            cv2.putText(text_box, text, (10, 30), font, 1, (0, 0, 0), 2, cv2.LINE_AA)  # Put text on the box
 
-        # Vertically concatenate the combined images and the text box
-        final_image = cv2.vconcat([combined, text_box])
+            # Vertically concatenate the combined images and the text box
+            final_image = cv2.vconcat([combined, text_box])
+        else:
+            final_image = combined
 
         # Display the final image
         # cv2.imshow('Videos with Text Box', final_image)
-        print ("Final image is ready.")
         container.image(final_image, channels="BGR")
