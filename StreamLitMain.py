@@ -1,4 +1,5 @@
 import os
+import time
 
 import streamlit as st
 import cv2
@@ -111,27 +112,28 @@ if uploaded_file is not None:
     st.session_state["uploaded_file"] = uploaded_file_without_extension
 
     set_q = True
-    st.write("File Details:")
-    st.write(f"Filename: {uploaded_file.name}")
-    st.write(f"File Type: {uploaded_file.type}")
-    st.write(f"File Size: {uploaded_file.size} bytes")
+    with st.empty():
+        st.write(f"Processing Uploaded File ... Please give it a few minutes.")
+        #st.write(f"Filename: {uploaded_file.name}")
+        #st.write(f"File Type: {uploaded_file.type}")
+        #st.write(f"File Size: {uploaded_file.size} bytes")
+        pv = PersonVideo(uploaded_file.name)
 
-    pv = PersonVideo(uploaded_file.name)
-
-    uploaded_file = None
-    print("Will draw_keypoints()")
-    pv.draw_keypoints()
-    print("Will save_video()")
-    pv.save_video()
-    # Process the uploaded file as needed (e.g., read contents, analyze data)
-    # For example, you can use Pandas to read a CSV file:
-    # import pandas as pd
-    # df = pd.read_csv(uploaded_file)
-    # st.dataframe(df)
+        uploaded_file = None
+        print("Will draw_keypoints()")
+        pv.draw_keypoints()
+        print("Will save_video()")
+        pv.save_video()
+        st.write("")
+        # Process the uploaded file as needed (e.g., read contents, analyze data)
+        # For example, you can use Pandas to read a CSV file:
+        # import pandas as pd
+        # df = pd.read_csv(uploaded_file)
+        # st.dataframe(df)
     print("Will call show_videos()")
-    # video_url_2 =  video_url_3
+        # video_url_2 =  video_url_3
     st.session_state["file_uploader_key"] += 1
-    # show_videos([video_url_1, video_url_3])
+        # show_videos([video_url_1, video_url_3])
     st.rerun()
 
 # Check if the button is clicked
