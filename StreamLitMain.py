@@ -1,20 +1,26 @@
+import os
+
 import streamlit as st
 import cv2
 import json
 
+from Person import PersonVideo
 from WorkoutUtils import WorkoutUtils
 
 # Define the video URLs
 video_url_1 = "JoynerSprintSquare"
 video_url_2 = "SakikoSprintSquare"
+#video_url_3 = "TetsuSprintSquare"
 image_url_1 = "JoynerRun.jpg"
 image_url_2 = "SakikoRun.jpg"
 
 set_h = False
 set_v = False
 set_q = False
+uploaded_file = None
 
 def show_videos(file_names):
+    print ("show_videos(%s, %s)" % (file_names[0], file_names[1]))
     global set_h, set_v, set_q
     my_container = st.empty()
     # Read the first video and metadata
@@ -30,6 +36,7 @@ def show_videos(file_names):
     i = 0
     while True:
         if set_q:
+            set_q = False
             return
         # Capture frames from each video
         # Video 1 should be slowed down
@@ -88,6 +95,45 @@ button_h = col1.button("Horizontal Max")
 button_v = col2.button("Vertical Max")
 # button_q = st.button("Quit")
 
+# File uploader button
+if "file_uploader_key" not in st.session_state:
+    st.session_state["file_uploader_key"] = 0
+
+if "uploaded_file" not in st.session_state:
+    st.session_state["uploaded_file"] = None
+
+uploaded_file = st.file_uploader("Choose a file", type=["mp4"],
+                                 key=st.session_state["file_uploader_key"])
+
+
+if uploaded_file is not None:
+    uploaded_file_without_extension, file_extension = os.path.splitext(uploaded_file.name)
+    st.session_state["uploaded_file"] = uploaded_file_without_extension
+
+    set_q = True
+    st.write("File Details:")
+    st.write(f"Filename: {uploaded_file.name}")
+    st.write(f"File Type: {uploaded_file.type}")
+    st.write(f"File Size: {uploaded_file.size} bytes")
+
+    pv = PersonVideo(uploaded_file.name)
+
+    uploaded_file = None
+    print("Will draw_keypoints()")
+    pv.draw_keypoints()
+    print("Will save_video()")
+    pv.save_video()
+    # Process the uploaded file as needed (e.g., read contents, analyze data)
+    # For example, you can use Pandas to read a CSV file:
+    # import pandas as pd
+    # df = pd.read_csv(uploaded_file)
+    # st.dataframe(df)
+    print("Will call show_videos()")
+    # video_url_2 =  video_url_3
+    st.session_state["file_uploader_key"] += 1
+    # show_videos([video_url_1, video_url_3])
+    st.rerun()
+
 # Check if the button is clicked
 if button_h:
     set_h = True
@@ -96,5 +142,13 @@ if button_v:
 #if button_q:
 #    set_q = True
 
-show_videos([video_url_1, video_url_2])
+def main():
+    print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
+    if st.session_state["uploaded_file"] is not None:
+        show_videos([video_url_1, st.session_state["uploaded_file"]])
+    else:
+        show_videos([video_url_1, video_url_2])
 
+if __name__ == "__main__":
+    # If the script is run directly, call the main function
+    main()
