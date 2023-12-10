@@ -63,10 +63,8 @@ class WorkoutUtils:
     def show_frames_side_by_side_sl(container, frame1, frame2, text = None):
         # Resize the frames to the same size
         if frame1 is None:
-            st.write("frame1 is None")
             frame1 = np.zeros((768, 768, 3), dtype=np.uint8)
         if frame2 is None:
-            st.write("frame2 is None")
             frame2 = np.zeros((768, 768, 3), dtype=np.uint8)
         frame1 = cv2.resize(frame1, (768, 768))
         frame2 = cv2.resize(frame2, (768, 768))
