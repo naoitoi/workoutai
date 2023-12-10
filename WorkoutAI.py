@@ -115,8 +115,8 @@ def load_and_analyze_video(filename, slow_down_factor = 1):
 def load_and_analyze_videos():
     personVideos = []
     for filename, slow_down_factor in [('JoynerSprintSquare.mp4', 2),
-                                       ('SakikoSprintSquare.mp4', 1),
-                                       ('NaoSprintSquare.mp4', 1)]:
+                                       ('Runner1Square.mp4', 1),
+                                       ('Runner3Square.mp4', 1)]:
         pv = PersonVideo(filename)
         personVideos.append(pv)
         pv.draw_keypoints()
