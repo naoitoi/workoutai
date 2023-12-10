@@ -10,10 +10,7 @@ from WorkoutUtils import WorkoutUtils
 
 # Define the video URLs
 video_url_1 = "JoynerSprintSquare"
-video_url_2 = "SakikoSprintSquare"
-#video_url_3 = "TetsuSprintSquare"
-image_url_1 = "JoynerRun.jpg"
-image_url_2 = "SakikoRun.jpg"
+video_url_2 = "Runner3Square"
 
 set_h = False
 set_v = False
