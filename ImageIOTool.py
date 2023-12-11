@@ -9,7 +9,8 @@ def convert(filename):
     fps = video_reader.get_meta_data()['fps']
 
     # Write the frames to a GIF file
-    imageio.mimsave(output_gif_path, [frame for frame in video_reader], fps=fps, compress='lossless')
+    imageio.mimsave(output_gif_path, [frame for frame in video_reader],
+                    fps=fps, compress='lossless', loop=65535)
 
 def main():
     num_args = len(sys.argv)

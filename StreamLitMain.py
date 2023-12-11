@@ -10,7 +10,7 @@ from WorkoutUtils import WorkoutUtils
 
 # Define the video URLs
 video_url_1 = "JoynerSprintSquare"
-video_url_2 = "Runner3Square"
+video_url_2 = "Runner1Square"
 
 set_h = False
 set_v = False
@@ -82,6 +82,15 @@ def show_videos(file_names):
             set_v = False
             pressedKey = cv2.waitKey(5000) & 0xFF
 
+def show_gifs(file_names):
+    gif1_filename = file_names[0] + '-out.gif'
+    gif1 = open(gif1_filename, "rb").read()
+    gif2_filename = file_names[1] + '-out.gif'
+    gif2 = open(gif2_filename, "rb").read()
+
+    st.image(gif1, width=512)
+    st.image(gif2, width=512)
+
 # Print Python version
 # print("Python version:", platform.python_version())
 # Print Streamlit version
@@ -142,11 +151,42 @@ if button_v:
 #    set_q = True
 
 def main():
-    print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
+    # Custom CSS to adjust the container width
+    custom_css = """
+    <style>
+        .stApp {
+            max-width: 2000px; /* Adjust the width as needed */
+            margin: auto; /* Center the container */
+        }
+    </style>
+    """
+
+    # Inject custom CSS
+    st.markdown(custom_css, unsafe_allow_html=True)
+
+    #st.markdown("[![Click me](app/static/JoynerSprintSquare-out.gif)](https://streamlit.io)")
+    # markdown = '<img src="app/static/JoynerSprintSquare-out.gif" width="512" height="512" />'
+    markdown = ('<head> \
+    <meta charset="UTF-8"> \
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> \
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
+    <title>Autoplay and Loop GIF</title> \
+</head> \
+                <div style="display: flex; flex-direction: row;"> \
+        <img src="app/static/JoynerSprintSquare-out.gif" alt="Image 1" width="512" height="512" autoplay loop> \
+        <img src="app/static/Runner1Square-out.gif" alt="Image 2" width="512" height="512" autoplay loop> \
+    </div>')
+    st.markdown(markdown, unsafe_allow_html=True)
+
+    # print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
     if st.session_state["uploaded_file"] is not None:
         show_videos([video_url_1, st.session_state["uploaded_file"]])
     else:
-        show_videos([video_url_1, video_url_2])
+        pass
+        #show_videos([video_url_1, video_url_2])
+        # show_gifs([video_url_1, video_url_2])
+
+
 
 if __name__ == "__main__":
     # If the script is run directly, call the main function
