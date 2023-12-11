@@ -164,18 +164,22 @@ def main():
     # Inject custom CSS
     st.markdown(custom_css, unsafe_allow_html=True)
 
-    #st.markdown("[![Click me](app/static/JoynerSprintSquare-out.gif)](https://streamlit.io)")
-    # markdown = '<img src="app/static/JoynerSprintSquare-out.gif" width="512" height="512" />'
     markdown = ('<head> \
     <meta charset="UTF-8"> \
     <meta http-equiv="X-UA-Compatible" content="IE=edge"> \
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
     <title>Autoplay and Loop GIF</title> \
 </head> \
-                <div style="display: flex; flex-direction: row;"> \
+                <div style="display: flex; flex-direction: column;"> \
         <img src="app/static/JoynerSprintSquare-out.gif" alt="Image 1" width="512" height="512" autoplay loop> \
         <img src="app/static/Runner1Square-out.gif" alt="Image 2" width="512" height="512" autoplay loop> \
-    </div>')
+    </div> \
+        <img src = "static/JoynerSprintSquare-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
+        <img src = "https://huggingface.co/spaces/naomaru/workout_ai/resolve/main/static/Runner3Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
+        <img src = "resolve/main/static/Runner1Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
+        <img src = "app/resolve/main/static/Runner3Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop>')
+
+
     st.markdown(markdown, unsafe_allow_html=True)
 
     # print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
