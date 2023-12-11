@@ -151,6 +151,16 @@ if button_v:
 #    set_q = True
 
 def main():
+    # Am I running on HuggingFace Spaces?
+    isRunningOnHF = False
+    if (os.environ.get('HOME') == '/home/user' and
+        os.environ.get('PYTHONPATH') == '/home/user/app' and
+        os.environ.get('PWD') is None):
+        isRunningOnHF = True
+        st.write('Running on HuggingFace Spaces')
+    else:
+        st.write('Not running on HuggingFace Spaces')
+
     # Custom CSS to adjust the container width
     custom_css = """
     <style>
