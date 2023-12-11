@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 import streamlit as st
 
 class WorkoutUtils:
@@ -93,3 +94,46 @@ class WorkoutUtils:
         # Display the final image
         # cv2.imshow('Videos with Text Box', final_image)
         container.image(final_image, channels="BGR")
+
+    @staticmethod
+    def show_gifs_side_by_side_sl(file_name1, file_name2):
+        # Am I running on HuggingFace Spaces?
+        isRunningOnHF = False
+        if (os.environ.get('HOME') == '/home/user' and
+            os.environ.get('PYTHONPATH') == '/home/user/app' and
+            os.environ.get('PWD') is None):
+            isRunningOnHF = True
+            print('Running on HuggingFace Spaces')
+        else:
+            print('Not running on HuggingFace Spaces')
+
+        media_prefix = 'https://huggingface.co/spaces/naomaru/workout_ai/resolve/main/static/' if isRunningOnHF else 'app/static/'
+        gif_url_1 = media_prefix + file_name1
+        gif_url_2 = media_prefix + file_name2
+
+        print("Show GIFs in %s and %s" % (gif_url_1, gif_url_2))
+
+        # Inject custom CSS to adjust the container width
+        custom_css = """
+        <style>
+        .stApp {
+            max-width: 2000px; /* Adjust the width as needed */
+            margin: auto; /* Center the container */
+        }
+        </style>
+        """
+
+        st.markdown(custom_css, unsafe_allow_html=True)
+
+        # Show GIFs
+        markdown = ('<head> \
+            <meta charset="UTF-8"> \
+            <meta http-equiv="X-UA-Compatible" content="IE=edge"> \
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
+            <title>Autoplay and Loop GIF</title> \
+        </head> \
+            <div style="display: flex; flex-direction: row;"> \
+                <img src="{}" alt="Image 1" width="512" height="512" autoplay loop> \
+                <img src="{}" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
+
+        st.markdown(markdown, unsafe_allow_html=True)

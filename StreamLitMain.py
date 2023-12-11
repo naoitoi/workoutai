@@ -1,5 +1,4 @@
 import os
-import time
 
 import streamlit as st
 import cv2
@@ -82,19 +81,6 @@ def show_videos(file_names):
             set_v = False
             pressedKey = cv2.waitKey(5000) & 0xFF
 
-def show_gifs(file_names):
-    gif1_filename = file_names[0] + '-out.gif'
-    gif1 = open(gif1_filename, "rb").read()
-    gif2_filename = file_names[1] + '-out.gif'
-    gif2 = open(gif2_filename, "rb").read()
-
-    st.image(gif1, width=512)
-    st.image(gif2, width=512)
-
-# Print Python version
-# print("Python version:", platform.python_version())
-# Print Streamlit version
-# print("Streamlit version:", st.__version__)
 
 # Create two button in columns
 col1, col2 = st.columns(2)
@@ -151,53 +137,11 @@ if button_v:
 #    set_q = True
 
 def main():
-    # Am I running on HuggingFace Spaces?
-    isRunningOnHF = False
-    if (os.environ.get('HOME') == '/home/user' and
-        os.environ.get('PYTHONPATH') == '/home/user/app' and
-        os.environ.get('PWD') is None):
-        isRunningOnHF = True
-        st.write('Running on HuggingFace Spaces')
-    else:
-        st.write('Not running on HuggingFace Spaces')
-
-    media_prefix = 'https://huggingface.co/spaces/naomaru/workout_ai/resolve/main/static' if isRunningOnHF else 'app/static'
-    gif_url_1 = media_prefix + '/JoynerSprintSquare-out.gif'
-    gif_url_2 = media_prefix + '/Runner1Square-out.gif'
-
-    # Custom CSS to adjust the container width
-    custom_css = """
-    <style>
-        .stApp {
-            max-width: 2000px; /* Adjust the width as needed */
-            margin: auto; /* Center the container */
-        }
-    </style>
-    """
-
-    # Inject custom CSS
-    st.markdown(custom_css, unsafe_allow_html=True)
-
-    markdown = ('<head> \
-    <meta charset="UTF-8"> \
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> \
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
-    <title>Autoplay and Loop GIF</title> \
-</head> \
-                <div style="display: flex; flex-direction: column;"> \
-        <img src="{}" alt="Image 1" width="512" height="512" autoplay loop> \
-        <img src="{}" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
-
-    st.markdown(markdown, unsafe_allow_html=True)
-
     # print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
     if st.session_state["uploaded_file"] is not None:
         show_videos([video_url_1, st.session_state["uploaded_file"]])
     else:
-        pass
-        # show_gifs([video_url_1, video_url_2])
-
-
+        WorkoutUtils.show_gifs_side_by_side_sl(video_url_1 + '-out.gif', video_url_2 + '-out.gif')
 
 if __name__ == "__main__":
     # If the script is run directly, call the main function
