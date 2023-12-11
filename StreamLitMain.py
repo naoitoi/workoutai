@@ -161,6 +161,10 @@ def main():
     else:
         st.write('Not running on HuggingFace Spaces')
 
+    media_prefix = 'https://huggingface.co/spaces/naomaru/workout_ai/resolve/main/static' if isRunningOnHF else 'app/static'
+    gif_url_1 = media_prefix + '/JoynerSprintSquare-out.gif'
+    gif_url_2 = media_prefix + '/Runner1Square-out.gif'
+
     # Custom CSS to adjust the container width
     custom_css = """
     <style>
@@ -181,29 +185,16 @@ def main():
     <title>Autoplay and Loop GIF</title> \
 </head> \
                 <div style="display: flex; flex-direction: column;"> \
-        <img src="app/static/JoynerSprintSquare-out.gif" alt="Image 1" width="512" height="512" autoplay loop> \
-        <img src="app/static/Runner1Square-out.gif" alt="Image 2" width="512" height="512" autoplay loop> \
-    </div> \
-        <img src = "static/JoynerSprintSquare-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
-        <img src = "https://huggingface.co/spaces/naomaru/workout_ai/resolve/main/static/Runner3Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
-        <img src = "resolve/main/static/Runner1Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop> \
-        <img src = "app/resolve/main/static/Runner3Square-out.gif" alt = "Image 1" width = "512" height = "512" autoplay loop>')
+        <img src="{}" alt="Image 1" width="512" height="512" autoplay loop> \
+        <img src="{}" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
 
     st.markdown(markdown, unsafe_allow_html=True)
-    st.write('PWD', os.environ.get('PWD'))
-    st.write('HOME', os.environ.get('HOME'))
-    st.write('PATH', os.environ.get('PATH'))
-    st.write('PYTHONPATH', os.environ.get('PYTHONPATH'))
-    st.write('PYTHONHOME', os.environ.get('PYTHONHOME'))
-    st.write('VIRTUAL_ENV', os.environ.get('VIRTUAL_ENV'))
-    st.write('OS', os.environ.get('OS'))
 
     # print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
     if st.session_state["uploaded_file"] is not None:
         show_videos([video_url_1, st.session_state["uploaded_file"]])
     else:
         pass
-        #show_videos([video_url_1, video_url_2])
         # show_gifs([video_url_1, video_url_2])
 
 
