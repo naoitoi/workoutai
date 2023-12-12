@@ -83,9 +83,9 @@ def show_videos(file_names):
 
 
 # Create two button in columns
-col1, col2 = st.columns(2)
-button_h = col1.button("Horizontal Max")
-button_v = col2.button("Vertical Max")
+#col1, col2 = st.columns(2)
+#button_h = col1.button("Horizontal Max")
+#button_v = col2.button("Vertical Max")
 # button_q = st.button("Quit")
 
 # File uploader button
@@ -129,19 +129,37 @@ if uploaded_file is not None:
     st.rerun()
 
 # Check if the button is clicked
-if button_h:
-    set_h = True
-if button_v:
-    set_v = True
+#if button_h:
+    #WorkoutUtils.show_gifs_side_by_side_sl(video_url_1 + '-out-mh.gif', video_url_2 + '-out-mh.gif')
+#    markdown = '<script>document.getElementById("placeholderDiv").innerHTML = <img src="Runner3Square-out-mh.gif" alt="New Image" width="100" height="100"></script>'
+#    st.markdown(markdown, unsafe_allow_html=True)
+
+#if button_v:
+#    set_v = True
 #if button_q:
 #    set_q = True
 
 def main():
-    # print ("file_uploader_key %d" % st.session_state["file_uploader_key"])
+    # st.write('<span style="font-size: 28px;">Workout AI</span>', unsafe_allow_html=True)
+
     if st.session_state["uploaded_file"] is not None:
         show_videos([video_url_1, st.session_state["uploaded_file"]])
     else:
         WorkoutUtils.show_gifs_side_by_side_sl(video_url_1 + '-out.gif', video_url_2 + '-out.gif')
+        st.write("Running Form")
+
+        metadata1 = json.load(open(video_url_1 + '-meta.json'))
+        metadata2 = json.load(open(video_url_2 + '-meta.json'))
+
+        WorkoutUtils.show_gifs_side_by_side_sl(video_url_1 + '-out-mh.gif', video_url_2 + '-out-mh.gif')
+        hs_ratio_1 = metadata1['hs_ratio']
+        hs_ratio_2 = metadata2['hs_ratio']
+        st.write("(Max horizontal distance between hip and associated ankle) / (leg len): Left = %d%%, Right = %d%%" % (round(hs_ratio_1 * 100), round(hs_ratio_2 * 100)))
+
+        WorkoutUtils.show_gifs_side_by_side_sl(video_url_1 + '-out-mv.gif', video_url_2 + '-out-mv.gif')
+        vs_ratio_1 = metadata1['vs_ratio']
+        vs_ratio_2 = metadata2['vs_ratio']
+        st.write("(Max vertical distance between two ankles) / (leg len): Left = %d%%, Right = %d%%" % (round(vs_ratio_1 * 100), round(vs_ratio_2 * 100)))
 
 if __name__ == "__main__":
     # If the script is run directly, call the main function

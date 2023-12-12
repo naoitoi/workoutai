@@ -109,8 +109,8 @@ def main():
 def load_and_analyze_video(filename, slow_down_factor = 1):
     pv = PersonVideo(filename)
     pv.draw_keypoints()
-    pv.save_video(slow_down_factor)
-    pv.show()
+    pv.save_gif(slow_down_factor)
+    #pv.show()
 
 def load_and_analyze_videos():
     personVideos = []
@@ -120,7 +120,8 @@ def load_and_analyze_videos():
         pv = PersonVideo(filename)
         personVideos.append(pv)
         pv.draw_keypoints()
-        pv.save_video(slow_down_factor)
+        #pv.save_video(slow_down_factor)
+        pv.save_gif(slow_down_factor)
         #pv.analyze()
         if pv.show() == False:
             break

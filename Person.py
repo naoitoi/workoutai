@@ -2,6 +2,8 @@ import json
 
 import cv2
 import os
+
+import imageio
 import tensorflow_hub as hub
 import tensorflow as tf
 from WorkoutUtils import WorkoutUtils
@@ -159,6 +161,7 @@ class PersonVideo:
     def __init__(self, filename = None):
         self.keypoints = []
         self.frames = []
+        self.np_frames = []
         self.metadata = {}
 
         if filename is not None:
@@ -167,6 +170,9 @@ class PersonVideo:
             print ("Loaded video %s (cap %s)" % (self.filename, self.cap))
         filename_split = os.path.splitext(self.filename)[0]
         self.outfilename = filename_split + '-out.mp4'
+        self.outgifname = filename_split + '-out.gif'
+        self.out_mh_gif_name = filename_split + '-out-mh.gif'
+        self.out_mv_gif_name = filename_split + '-out-mv.gif'
         self.metafilename = filename_split + '-meta.json'
 
     # Load a video.  If filename is provided, load that video.  Otherwise, use the filename provided in the constructor
@@ -185,6 +191,7 @@ class PersonVideo:
                 break
             pf = PersonFrame(frame)
             self.frames.append(pf)
+            # self.np_frames.append(cv2.cvtColor(pf.frame, cv2.COLOR_BGR2RGB))
 
     def save_video(self, slow_down_factor = 1):
         height, width, _ = self.frames[0].frame.shape
@@ -209,6 +216,34 @@ class PersonVideo:
             out.write(frame.frame)
         # Release everything if job is finished
         out.release()
+
+    def save_gif(self, slow_down_factor = 1):
+        height, width, _ = self.frames[0].frame.shape
+
+        # Save the metadata
+        print ("Saving metadata: %s" % (self.metafilename))
+        with open(self.metafilename, 'w') as json_file:
+            json.dump(self.metadata, json_file)
+
+        fps = self.cap.get(cv2.CAP_PROP_FPS) // slow_down_factor
+        # Save the annotated video
+        print ("Saving: %s (fps: %d)" % (self.outgifname, self.cap.get(cv2.CAP_PROP_FPS)))
+        # Write the frames to a GIF file
+        imageio.mimsave(self.outgifname,
+                        [cv2.cvtColor(frame.frame, cv2.COLOR_BGR2RGB) for frame in self.frames],
+                        fps=fps, compress='lossless', loop=65535)
+
+        # Write Max Horizontal GIF
+        frame_index = self.metadata['mhs_frame']
+        imageio.imwrite(self.out_mh_gif_name,
+                        cv2.cvtColor(self.frames[frame_index].frame, cv2.COLOR_BGR2RGB),
+                        compress='lossless')
+
+        # Write Max Virtical GIF
+        frame_index = self.metadata['mvs_frame']
+        imageio.imwrite(self.out_mv_gif_name,
+                        cv2.cvtColor(self.frames[frame_index].frame, cv2.COLOR_BGR2RGB),
+                        compress='lossless')
 
     def draw_keypoints(self):
         max_horizontal_stride = 0

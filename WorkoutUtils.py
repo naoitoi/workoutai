@@ -132,7 +132,7 @@ class WorkoutUtils:
             <meta name="viewport" content="width=device-width, initial-scale=1.0"> \
             <title>Autoplay and Loop GIF</title> \
         </head> \
-            <div style="display: flex; flex-direction: row;"> \
+            <div id="placeholderDiv" style="display: flex; flex-direction: row;"> \
                 <img src="{}" alt="Image 1" width="512" height="512" autoplay loop> \
                 <img src="{}" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
 
