@@ -2,6 +2,7 @@ import os
 import time
 
 import streamlit as st
+from streamlit_js_eval import streamlit_js_eval
 import cv2
 import json
 
@@ -123,24 +124,31 @@ uploaded_file = st.file_uploader("Choose a file", type=["mp4"],
 
 if uploaded_file is not None:
     uploaded_file_without_extension, file_extension = os.path.splitext(uploaded_file.name)
-    # st.session_state["uploaded_file"] = uploaded_file_without_extension
+    st.session_state["uploaded_file"] = uploaded_file_without_extension
+    print("File uploaded: ", uploaded_file_without_extension)
 
     set_q = True
     with st.empty():
-        st.write(f"Processing Uploaded File ... Please give it a few minutes.")
+        st.write(f"Processing Uploaded File.  Please give it a few minutes.")
         pv = PersonVideo(uploaded_file.name)
         uploaded_file = None
         print("Will draw_keypoints()")
         pv.draw_keypoints()
         print("Will save_gif()")
         pv.save_gif()
-        st.write("Show: ", uploaded_file_without_extension)
-        show_gifs(g_video_url_1, uploaded_file_without_extension)
+        #st.write("Show: ", uploaded_file_without_extension)
+        # show_gifs(g_video_url_1, uploaded_file_without_extension)
+        # streamlit_js_eval(js_expressions="parent.window.location.reload()")
+        #st.experimental_rerun()
+        #st.rerun()
 
 def main():
-    show_gifs(g_video_url_1, g_video_url_2)
-    time.sleep(3)
-    show_gifs(g_video_url_1, 'SakikoSprintSquare')
+    if st.session_state["uploaded_file"] is not None:
+        print ("Show gif: ", uploaded_file_without_extension)
+        show_gifs(g_video_url_1, uploaded_file_without_extension)
+    else:
+        print ('Show default gifs')
+        show_gifs(g_video_url_1, g_video_url_2)
 
 if __name__ == "__main__":
     # If the script is run directly, call the main function

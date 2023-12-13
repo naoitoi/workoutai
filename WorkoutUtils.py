@@ -133,7 +133,7 @@ class WorkoutUtils:
             <title>Autoplay and Loop GIF</title> \
         </head> \
             <div id="placeholderDiv" style="display: flex; flex-direction: row;"> \
-                <img src="{}" alt="Image 1" width="512" height="512" autoplay loop> \
-                <img src="{}" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
+                <img src="{}" id="image1" alt="Image 1" width="512" height="512" autoplay loop> \
+                <img src="{}" id="image2" alt="Image 2" width="512" height="512" autoplay loop>'.format(gif_url_1, gif_url_2))
 
         st.markdown(markdown, unsafe_allow_html=True)
