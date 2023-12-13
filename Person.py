@@ -169,11 +169,11 @@ class PersonVideo:
             self.load_video(filename)
             print ("Loaded video %s (cap %s)" % (self.filename, self.cap))
         filename_split = os.path.splitext(self.filename)[0]
-        self.outfilename = filename_split + '-out.mp4'
-        self.outgifname = filename_split + '-out.gif'
-        self.out_mh_gif_name = filename_split + '-out-mh.gif'
-        self.out_mv_gif_name = filename_split + '-out-mv.gif'
-        self.metafilename = filename_split + '-meta.json'
+        self.outfilename = 'static/' + filename_split + '-out.mp4'
+        self.outgifname = 'static/' + filename_split + '-out.gif'
+        self.out_mh_gif_name = 'static/' + filename_split + '-out-mh.gif'
+        self.out_mv_gif_name = 'static/' + filename_split + '-out-mv.gif'
+        self.metafilename = 'static/' + filename_split + '-meta.json'
 
     # Load a video.  If filename is provided, load that video.  Otherwise, use the filename provided in the constructor
     def load_video(self, filename = None):
